@@ -11,6 +11,14 @@ ARG GID=1001
 
 RUN mkdir -p gatling
 
+# Install java 17
+RUN apt-get update \
+    && apt-get -y install openjdk-17-jdk software-properties-common curl unzip wget sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH $JAVA_HOME/bin:$PATH
+
 # Install utilities
 RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && \
     apt-get install -y --no-install-recommends bash git gfortran python3.7 python3.7-dev python3.7-distutils python3-apt && \

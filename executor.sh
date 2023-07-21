@@ -123,6 +123,9 @@ cd /opt/gatling/bin
 
 echo "Starting simulation: ${simulation_name}"
 
+echo "***********************"
+echo "$DEFAULT_EXECUTION" "$JOLOKIA_AGENT $DEFAULT_JAVA_OPTS $JAVA_OPTS -jar /opt/gatling/$test"
+echo "***********************"
 "$DEFAULT_EXECUTION" $JOLOKIA_AGENT $DEFAULT_JAVA_OPTS $JAVA_OPTS -jar /opt/gatling/$test
 
 sleep 60s
