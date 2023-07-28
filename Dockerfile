@@ -56,10 +56,20 @@ RUN apt-get update && \
   tzdata ca-certificates libsystemd-dev && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+RUN tar -xvf apache-maven-3.6.3-bin.tar.gz
+
+ENV M2_HOME='/opt/apache-maven-3.6.3'
+ENV PATH="$M2_HOME/bin:$PATH"
+
+RUN mvn -version
+
 USER ${UNAME}
 
 RUN mkdir -p /opt/gatling/bin
 RUN mkdir -p /opt/gatling/conf
+RUN mkdir -p /opt/gatling/lib
+RUN mkdir -p /opt/gatling/src
 COPY executor.sh /opt
 RUN sudo chmod +x /opt/executor.sh
 COPY post_processing/post_processor.py /opt/gatling/bin
@@ -68,6 +78,10 @@ COPY pre_processing/minio_reader.py /opt/gatling/bin
 COPY pre_processing/minio_poster.py /opt/gatling/bin
 COPY pre_processing/minio_args_poster.py /opt/gatling/bin
 COPY pre_processing/minio_additional_files_reader.py /opt/gatling/bin
+COPY lib/gatling-core-3.7.6.jar /opt/gatling/lib
+COPY lib/gatling-http-3.7.6.jar /opt/gatling/lib
+COPY pom.xml /opt/gatling
+COPY src/ /opt/gatling/src
 
 COPY logback.xml /opt/gatling/conf
 
