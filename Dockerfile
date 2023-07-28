@@ -78,10 +78,13 @@ COPY pre_processing/minio_reader.py /opt/gatling/bin
 COPY pre_processing/minio_poster.py /opt/gatling/bin
 COPY pre_processing/minio_args_poster.py /opt/gatling/bin
 COPY pre_processing/minio_additional_files_reader.py /opt/gatling/bin
-COPY libs/gatling-core-3.7.6.jar /opt/gatling/lib
-COPY libs/gatling-http-3.7.6.jar /opt/gatling/lib
 COPY pom.xml /opt/gatling
 COPY src/ /opt/gatling/src
+COPY libs/gatling-core-3.7.6.jar /opt/gatling/lib
+COPY libs/gatling-http-3.7.6.jar /opt/gatling/lib
+RUN mvn gatling:test -f pom.xml -Dgatling.simulationClass=computerdatabase.FloodIoJava -Dlogback.configurationFile=logback.xml
+COPY libs/gatling-core-3.7.6.jar /home/carrier/.m2/repository/io/gatling/gatling-core/3.7.6
+COPY libs/gatling-http-3.7.6.jar /home/carrier/.m2/repository/io/gatling/gatling-http/3.7.6
 
 COPY logback.xml /opt/gatling/conf
 
