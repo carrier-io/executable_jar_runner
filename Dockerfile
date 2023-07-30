@@ -64,8 +64,6 @@ ENV PATH="$M2_HOME/bin:$PATH"
 
 RUN mvn -version
 
-USER ${UNAME}
-
 RUN mkdir -p /opt/gatling/bin
 RUN mkdir -p /opt/gatling/conf
 RUN mkdir -p /opt/gatling/lib
@@ -82,13 +80,11 @@ COPY pre_processing/minio_additional_files_reader.py /opt/gatling/bin
 COPY pom.xml /opt/gatling
 COPY pom.xml /opt/gatling/conf
 COPY src/ /opt/gatling/src
-COPY libs/gatling-core-3.7.6.jar /opt/gatling/lib
-COPY libs/gatling-http-3.7.6.jar /opt/gatling/lib
 WORKDIR /opt/gatling
 RUN mvn gatling:test -f pom.xml -Dgatling.simulationClass=computerdatabase.FloodIoJava -Dlogback.configurationFile=logback.xml
 RUN rm /tmp/test_results.log /tmp/users.log /tmp/flood_simulation.log
-COPY libs/gatling-core-3.7.6.jar /home/carrier/.m2/repository/io/gatling/gatling-core/3.7.6
-COPY libs/gatling-http-3.7.6.jar /home/carrier/.m2/repository/io/gatling/gatling-http/3.7.6
+COPY libs/gatling-core-3.7.6.jar /root/.m2/repository/io/gatling/gatling-core/3.7.6
+COPY libs/gatling-http-3.7.6.jar /root/.m2/repository/io/gatling/gatling-http/3.7.6
 
 COPY logback.xml /opt/gatling/conf
 

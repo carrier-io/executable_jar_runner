@@ -106,8 +106,6 @@ python /opt/gatling/bin/downsampling.py -t $test_type -s $simulation_name -b ${b
 cp /opt/gatling/conf/logback.xml /opt/gatling/src/test/resources/logback.xml
 cp /opt/gatling/conf/pom.xml /opt/gatling/pom.xml
 
-sleep 120
-
 if [[ -z "${JVM_ARGS}" ]]; then
   export JVM_ARGS="-Xms1g -Xmx1g"
 fi
@@ -127,7 +125,7 @@ cd /opt/gatling
 
 echo "Starting simulation: ${test}"
 
-mvn gatling:test -f pom.xml $JOLOKIA_AGENT $DEFAULT_JAVA_OPTS $JAVA_OPTS -Dgatling.simulationClass=$test -Dlogback.configurationFile=logback.xml
+mvn gatling:test -f pom.xml $JAVA_OPTS -Dgatling.simulationClass=$test -Dlogback.configurationFile=logback.xml
 
 sleep 60s
 python /opt/gatling/bin/post_processor.py -t $test_type -s $simulation_name -b ${build_id} -l ${lg_id} ${_influx_host} -p ${influx_port} -idb ${gatling_db} -icdb ${comparison_db} -en ${env} ${_influx_user} ${_influx_password}

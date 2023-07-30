@@ -27,18 +27,6 @@
       <version>${gatling.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>io.gatling</groupId>
-      <artifactId>gatling-http</artifactId>
-      <version>3.7.6</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.gatling</groupId>
-      <artifactId>gatling-core</artifactId>
-      <version>3.7.6</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
