@@ -103,6 +103,10 @@ python /opt/gatling/bin/minio_reader.py
 python /opt/gatling/bin/minio_additional_files_reader.py
 python /opt/gatling/bin/downsampling.py -t $test_type -s $simulation_name -b ${build_id} -l ${lg_id} ${_influx_host} -p ${influx_port} -idb ${gatling_db} -en ${env} ${_influx_user} ${_influx_password} &
 
+cp /opt/gatling/conf/logback.xml /opt/gatling/src/test/resources/logback.xml
+cp /opt/gatling/conf/pom.xml /opt/gatling/pom.xml
+
+sleep 120
 
 if [[ -z "${JVM_ARGS}" ]]; then
   export JVM_ARGS="-Xms1g -Xmx1g"
@@ -119,11 +123,11 @@ DEFAULT_JAVA_OPTS="${DEFAULT_JAVA_OPTS} -Djava.net.preferIPv4Stack=true -Djava.n
 export JAVA_OPTS="-Dgatling.http.ahc.pooledConnectionIdleTimeout=150000 -Dgatling.http.ahc.readTimeout=150000 -Dgatling.http.ahc.requestTimeout=150000 -Dgatling.data.writers.0=console -Dgatling.data.writers.1=file -Dcharting.indicators.lowerBound=2000 -Dcharting.indicators.higherBound=3000 ${GATLING_TEST_PARAMS}"
 
 echo $JAVA_OPTS
-cd /opt/gatling/bin
+cd /opt/gatling
 
-echo "Starting simulation: ${simulation_name}"
+echo "Starting simulation: ${test}"
 
-"$DEFAULT_EXECUTION" $JOLOKIA_AGENT $DEFAULT_JAVA_OPTS $JAVA_OPTS -jar /opt/gatling/$test
+mvn gatling:test -f pom.xml $JOLOKIA_AGENT $DEFAULT_JAVA_OPTS $JAVA_OPTS -Dgatling.simulationClass=$test -Dlogback.configurationFile=logback.xml
 
 sleep 60s
 python /opt/gatling/bin/post_processor.py -t $test_type -s $simulation_name -b ${build_id} -l ${lg_id} ${_influx_host} -p ${influx_port} -idb ${gatling_db} -icdb ${comparison_db} -en ${env} ${_influx_user} ${_influx_password}

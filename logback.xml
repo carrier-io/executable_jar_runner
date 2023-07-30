@@ -22,7 +22,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/test_results.log</file>
+        <file>/opt/gatling/logs/test_results.log</file>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>TRACE</level>
             <onMatch>ACCEPT</onMatch>
@@ -35,7 +35,7 @@
     </appender>
 
     <appender name="USERS" class="ch.qos.logback.core.FileAppender">
-        <file>logs/users.log</file>
+        <file>/opt/gatling/logs/users.log</file>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>
             <onMatch>ACCEPT</onMatch>
