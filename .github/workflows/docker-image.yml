@@ -5,7 +5,7 @@ on:
     tags: 
       - '*'
   push:
-    branches: [ mvn ]
+    branches: [ mvn_debug ]
 
 jobs:
 
