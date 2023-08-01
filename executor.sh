@@ -121,7 +121,7 @@ export JAVA_OPTS="-Dgatling.http.ahc.pooledConnectionIdleTimeout=150000 -Dgatlin
 echo $JAVA_OPTS
 cd /opt/gatling/bin
 
-echo "Starting simulation: ${simulation_name}"
+echo "Starting simulation: ${$test}"
 
 "$DEFAULT_EXECUTION" $JOLOKIA_AGENT $DEFAULT_JAVA_OPTS $JAVA_OPTS -jar /opt/gatling/$test
 
