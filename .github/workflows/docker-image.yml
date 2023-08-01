@@ -5,7 +5,7 @@ on:
     tags: 
       - '*'
   push:
-    branches: [ beta-1.0 ]
+    branches: [ beta-1.0_java17 ]
 
 jobs:
 
