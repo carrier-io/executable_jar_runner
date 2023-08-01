@@ -104,7 +104,6 @@ python /opt/gatling/bin/minio_additional_files_reader.py
 python /opt/gatling/bin/downsampling.py -t $test_type -s $simulation_name -b ${build_id} -l ${lg_id} ${_influx_host} -p ${influx_port} -idb ${gatling_db} -en ${env} ${_influx_user} ${_influx_password} &
 
 cp /opt/gatling/conf/logback.xml /opt/gatling/src/test/resources/logback.xml
-cp /opt/gatling/conf/pom.xml /opt/gatling/pom.xml
 
 if [[ -z "${JVM_ARGS}" ]]; then
   export JVM_ARGS="-Xms1g -Xmx1g"
