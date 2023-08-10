@@ -22,8 +22,8 @@ jobs:
     -
        name: Build
        run: |
-          docker build -t getcarrier/executable_jar_runner:beta-1.0-gatling .
+          docker build -t getcarrier/executable_jar_runner:latest-gatling .
     -
        name: Push
        run: |
-         docker push getcarrier/executable_jar_runner:beta-1.0-gatling
+         docker push getcarrier/executable_jar_runner:latest-gatling
