@@ -22,8 +22,8 @@ jobs:
     -
        name: Build
        run: |
-          docker build -t getcarrier/gatling_maven_runner:beta-1.0-3.7 .
+          docker build -t getcarrier/gatling_maven_runner:latest-3.7 .
     -
        name: Push
        run: |
-         docker push getcarrier/gatling_maven_runner:beta-1.0-3.7
+         docker push getcarrier/gatling_maven_runner:latest-3.7
