@@ -102,6 +102,7 @@ export tests_path=/opt/gatling
 python /opt/gatling/bin/minio_reader.py
 python /opt/gatling/bin/minio_additional_files_reader.py
 python /opt/gatling/bin/downsampling.py -t $test_type -s $simulation_name -b ${build_id} -l ${lg_id} ${_influx_host} -p ${influx_port} -idb ${gatling_db} -en ${env} ${_influx_user} ${_influx_password} &
+python /opt/gatling/bin/simulation_log_parser.py -t $test_type -s $simulation_name -b ${build_id} -l ${lg_id} ${_influx_host} -p ${influx_port} -idb ${gatling_db} -en ${env} ${_influx_user} ${_influx_password} &
 
 cp /opt/gatling/conf/logback.xml /opt/gatling/src/test/resources/logback.xml
 

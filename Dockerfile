@@ -28,7 +28,7 @@ RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && \
     python -m pip install --upgrade pip && \
     apt-get clean && \
     python -m pip install setuptools==40.6.2 && \
-    python -m pip install 'common==0.1.2' 'configobj==5.0.6' 'redis==3.2.0' 'argparse==1.4.0' && \
+    python -m pip install 'common==0.1.2' 'configobj==5.0.6' 'redis==3.2.0' 'argparse==1.4.0' 'watchdog' && \
     rm -rf /tmp/*
 
 RUN pip install git+https://github.com/carrier-io/perfreporter.git
@@ -71,7 +71,7 @@ ENV M2_HOME='/opt/apache-maven-3.6.3'
 ENV PATH="$M2_HOME/bin:$PATH"
 
 RUN mvn -version
-
+ENV PYTHONUNBUFFERED=1
 RUN mkdir -p /opt/gatling/bin
 RUN mkdir -p /opt/gatling/conf
 RUN mkdir -p /opt/gatling/lib
@@ -81,6 +81,7 @@ COPY executor.sh /opt
 RUN sudo chmod +x /opt/executor.sh
 COPY post_processing/post_processor.py /opt/gatling/bin
 COPY post_processing/downsampling.py /opt/gatling/bin
+COPY post_processing/simulation_log_parser.py /opt/gatling/bin
 COPY pre_processing/minio_reader.py /opt/gatling/bin
 COPY pre_processing/minio_poster.py /opt/gatling/bin
 COPY pre_processing/minio_args_poster.py /opt/gatling/bin
