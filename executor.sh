@@ -75,8 +75,8 @@ sudo sed -i "s/INFLUX_DB/${gatling_db}/g" /etc/telegraf/telegraf_test_results.co
 sudo sed -i "s/INFLUX_USER/${influx_user}/g" /etc/telegraf/telegraf_test_results.conf
 sudo sed -i "s/INFLUX_PASSWORD/${influx_password}/g" /etc/telegraf/telegraf_test_results.conf
 sudo service telegraf restart
-sudo telegraf -config /etc/telegraf/telegraf_test_results.conf &
-sudo telegraf -config /etc/telegraf/telegraf_local_results.conf &
+#sudo telegraf -config /etc/telegraf/telegraf_test_results.conf &
+#sudo telegraf -config /etc/telegraf/telegraf_local_results.conf &
 fi
 
 if [[ -z "${influx_user}" ]]; then

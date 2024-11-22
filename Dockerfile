@@ -21,16 +21,17 @@ ENV PATH $JAVA_HOME/bin:$PATH
 
 # Install utilities
 RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && \
-    apt-get install -y --no-install-recommends bash git gfortran python3.7 python3.7-dev python3.7-distutils python3-apt && \
-    wget https://bootstrap.pypa.io/get-pip.py && python3.7 get-pip.py && \
-    ln -s /usr/bin/python3.7 /usr/local/bin/python3 && \
-    ln -s /usr/bin/python3.7 /usr/local/bin/python && \
+    apt-get install -y --no-install-recommends bash git gfortran python3.8 python3.8-dev python3.8-distutils python3-apt && \
+    wget https://bootstrap.pypa.io/get-pip.py && python3.8 get-pip.py && \
+    ln -s /usr/bin/python3.8 /usr/local/bin/python3 && \
+    ln -s /usr/bin/python3.8 /usr/local/bin/python && \
     python -m pip install --upgrade pip && \
     apt-get clean && \
     python -m pip install setuptools==40.6.2 && \
     python -m pip install 'common==0.1.2' 'configobj==5.0.6' 'redis==3.2.0' 'argparse==1.4.0' 'watchdog' && \
     rm -rf /tmp/*
 
+ENV rebuild 1
 RUN pip install git+https://github.com/carrier-io/perfreporter.git
 RUN pip install git+https://github.com/carrier-io/loki_logger.git
 
@@ -64,10 +65,10 @@ RUN apt-get update && \
   tzdata ca-certificates libsystemd-dev && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN wget https://mirrors.estointernet.in/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
-RUN tar -xvf apache-maven-3.6.3-bin.tar.gz
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
+RUN tar -xvf apache-maven-3.9.9-bin.tar.gz
 
-ENV M2_HOME='/opt/apache-maven-3.6.3'
+ENV M2_HOME='/opt/apache-maven-3.9.9'
 ENV PATH="$M2_HOME/bin:$PATH"
 
 RUN mvn -version
@@ -88,12 +89,7 @@ COPY pre_processing/minio_args_poster.py /opt/gatling/bin
 COPY pre_processing/minio_additional_files_reader.py /opt/gatling/bin
 COPY pom.xml /opt/gatling
 COPY pom.xml /opt/gatling/conf
-COPY src/ /opt/gatling/src
 WORKDIR /opt/gatling
-RUN mvn gatling:test -f pom.xml -Dgatling.simulationClass=computerdatabase.FloodIoJava -Dlogback.configurationFile=logback.xml
-RUN rm /tmp/test_results.log /tmp/users.log /tmp/flood_simulation.log
-COPY libs/gatling-core-3.7.6.jar /root/.m2/repository/io/gatling/gatling-core/3.7.6
-COPY libs/gatling-http-3.7.6.jar /root/.m2/repository/io/gatling/gatling-http/3.7.6
 
 COPY logback.xml /opt/gatling/conf
 

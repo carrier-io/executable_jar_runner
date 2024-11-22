@@ -2,6 +2,7 @@ import argparse
 import requests
 from perfreporter.downsampling import Downsampler
 from os import environ
+from influxdb import InfluxDBClient
 
 
 def get_args():
@@ -37,4 +38,6 @@ if __name__ == '__main__':
     if environ.get("report_id"):
         update_test_status()
     args = get_args()
+    internal_client = InfluxDBClient("localhost", "8086", "", "", "local")
+    internal_client.create_database("local")
     Downsampler(args).run()
