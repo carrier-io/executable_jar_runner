@@ -83,6 +83,7 @@ RUN sudo chmod +x /opt/executor.sh
 COPY post_processing/post_processor.py /opt/gatling/bin
 COPY post_processing/downsampling.py /opt/gatling/bin
 COPY post_processing/simulation_log_parser.py /opt/gatling/bin
+COPY post_processing/error_log_parser.py /opt/gatling/bin
 COPY pre_processing/minio_reader.py /opt/gatling/bin
 COPY pre_processing/minio_poster.py /opt/gatling/bin
 COPY pre_processing/minio_args_poster.py /opt/gatling/bin
