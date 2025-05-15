@@ -21,10 +21,10 @@ ENV PATH $JAVA_HOME/bin:$PATH
 
 # Install utilities
 RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && \
-    apt-get install -y --no-install-recommends bash git gfortran python3.8 python3.8-dev python3.8-distutils python3-apt && \
+    apt-get install -y --no-install-recommends bash git gfortran python3.9 python3.9-dev python3.9-distutils python3-apt && \
     wget https://bootstrap.pypa.io/get-pip.py && python3.8 get-pip.py && \
-    ln -s /usr/bin/python3.8 /usr/local/bin/python3 && \
-    ln -s /usr/bin/python3.8 /usr/local/bin/python && \
+    ln -s /usr/bin/python3.9 /usr/local/bin/python3 && \
+    ln -s /usr/bin/python3.9 /usr/local/bin/python && \
     python -m pip install --upgrade pip && \
     apt-get clean && \
     python -m pip install setuptools==40.6.2 && \

@@ -24,6 +24,8 @@ class CSVHandler:
         with open(self.csv_path, 'r') as file:
             file.seek(self.last_position)
             new_data = file.readlines()
+            # Update the last known position
+            self.last_position = file.tell()
             records = []
             results = []
             user_records = []
@@ -78,7 +80,8 @@ class CSVHandler:
                     except Exception as e:
                         print(f"Error processing record: {each}. Exception: {e}")
                         # Roll back the file pointer by one line
-                        self.last_position = self.last_position - 1
+                        if self.last_position != 0:
+                            self.last_position = self.last_position - 1
                         break  # Exit the loop to retry this line in the next iteration
 
                 if not users:
@@ -87,8 +90,6 @@ class CSVHandler:
                 print(f"Users count: {len(users)}")
                 print(f"Active Users: {self.active_users}")
                 print(f"Results count: {len(results)}")
-                # Update the last known position
-                self.last_position = file.tell()
 
             users_internal_points, users_external_points = [], []
             for req in users:
