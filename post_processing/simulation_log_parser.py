@@ -76,8 +76,10 @@ class CSVHandler:
                             }
                             results.append(_res)
                     except Exception as e:
-                        print(e)
-                        print(format_exc())
+                        print(f"Error processing record: {each}. Exception: {e}")
+                        # Roll back the file pointer by one line
+                        self.last_position = self.last_position - 1
+                        break  # Exit the loop to retry this line in the next iteration
 
                 if not users:
                     users.append({"time": int(time.time() * 1000), "active": self.active_users})
