@@ -1,4 +1,4 @@
-FROM getcarrier/performance:base-latest
+FROM getcarrier/performance:ubuntu-24
 
 
 WORKDIR /opt
@@ -21,18 +21,18 @@ ENV PATH $JAVA_HOME/bin:$PATH
 
 # Install utilities
 RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && \
-    apt-get install -y --no-install-recommends bash git gfortran python3.9 python3.9-dev python3.9-distutils python3-apt && \
-    wget https://bootstrap.pypa.io/get-pip.py && python3.8 get-pip.py && \
-    ln -s /usr/bin/python3.9 /usr/local/bin/python3 && \
-    ln -s /usr/bin/python3.9 /usr/local/bin/python && \
+    apt-get install -y --no-install-recommends bash git gfortran python3.11 python3-dev python3.11-distutils python3-apt && \
+    wget https://bootstrap.pypa.io/get-pip.py && python3.11 get-pip.py && \
+    ln -s /usr/bin/python3.11 /usr/local/bin/python3 && \
+    ln -s /usr/bin/python3.11 /usr/local/bin/python && \
     python -m pip install --upgrade pip && \
     apt-get clean && \
-    python -m pip install setuptools==40.6.2 && \
-    python -m pip install 'common==0.1.2' 'configobj==5.0.6' 'redis==3.2.0' 'argparse==1.4.0' 'watchdog' && \
+    python -m pip install --upgrade setuptools && \
+    python -m pip install 'common==0.1.2' 'configobj==5.0.6' 'redis==3.2.0' 'argparse==1.4.0' 'pandas==2.3.1' 'watchdog' && \
     rm -rf /tmp/*
 
 ENV rebuild 1
-RUN pip install git+https://github.com/carrier-io/perfreporter.git
+RUN pip install git+https://github.com/carrier-io/perfreporter.git@updated_pandas
 RUN pip install git+https://github.com/carrier-io/loki_logger.git
 
 # Creating carrier user and making him sudoer
@@ -65,10 +65,10 @@ RUN apt-get update && \
   tzdata ca-certificates libsystemd-dev && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
-RUN tar -xvf apache-maven-3.9.9-bin.tar.gz
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz
+RUN tar -xvf apache-maven-3.9.11-bin.tar.gz
 
-ENV M2_HOME='/opt/apache-maven-3.9.9'
+ENV M2_HOME='/opt/apache-maven-3.9.11'
 ENV PATH="$M2_HOME/bin:$PATH"
 
 RUN mvn -version
