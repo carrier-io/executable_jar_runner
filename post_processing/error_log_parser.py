@@ -26,6 +26,16 @@ class ErrorLogHandler:
             self.last_position = file.tell()
             errors = []
             if new_data:
+                # New: Extract request body if present (include braces for JSON)
+                body_pattern = re.compile(r"body:StringChunksRequestBody\{charset=UTF-8, content=\{(.*?)\}\}", re.DOTALL)
+                # List of sensitive header names (lowercase)
+                sensitive_headers = [
+                    'authorization', 'proxy-authorization', 'x-api-key', 'x-auth-token', 'x-access-token',
+                    'set-cookie', 'cookie', 'password', 'x-password', 'x-session-token', 'x-csrf-token',
+                    'x-xsrf-token', 'x-refresh-token', 'x-secret', 'x-client-secret', 'x-client-key',
+                    'x-private-key', 'x-user-token', 'x-user-secret', 'x-otp', 'x-mfa', 'x-sso-token',
+                    'x-id-token', 'x-refresh-token', 'x-jwt', 'jwt', 'bearer'
+                ]
                 for match in error_pattern.finditer(new_data):
                     error_data = match.groupdict()
 
@@ -33,12 +43,23 @@ class ErrorLogHandler:
                     url_parts = error_data["url"].split("?")
                     request_params = url_parts[1] if len(url_parts) > 1 else None
 
-                    # Clean up headers
-                    request_headers = {
-                        line.split(":")[0].strip(): line.split(":")[1].strip()
-                        for line in error_data["request_headers"].strip().split("\n")
-                        if ":" in line
-                    }
+                    # Clean up headers and hide sensitive info
+                    request_headers = {}
+                    for line in error_data["request_headers"].strip().split("\n"):
+                        if ":" in line:
+                            k, v = line.split(":", 1)
+                            k_lower = k.strip().lower()
+                            v_lower = v.strip().lower()
+                            # Hide if header name is sensitive or value contains 'bearer' or 'password'
+                            if k_lower in sensitive_headers or any(s in v_lower for s in sensitive_headers):
+                                request_headers[k.strip()] = '***'
+                            else:
+                                request_headers[k.strip()] = v.strip()
+                    # Extract request body if present (include braces)
+                    request_body = None
+                    body_match = body_pattern.search(new_data, match.start(), match.end())
+                    if body_match:
+                        request_body = body_match.group(1).strip()
                     error_key = f'{error_data["request_name"]}_{error_data["method"]}_{error_data["response_code"]}'
                     # Store formatted result
                     errors.append({
@@ -50,15 +71,17 @@ class ErrorLogHandler:
                         "error_message": error_data["error_message"],
                         "request_params": request_params,
                         "request_headers": request_headers,
-                        "response_body": error_data["response_body"].strip().replace("\"", "").replace("\'", "").replace("'", "")
+                        "request_body": request_body,  # New field
+                        "response_body": error_data["response_body"].strip().replace("\"", "").replace("'", "")
                     })
             for each in errors:
                 error_log_line = f'Error key: {each["error_key"]}\tRequest name: {each["request_name"]}\t' \
                                  f'Method: {each["method"]}\tResponse code: {each["response_code"]}\t' \
                                  f'URL: {each["url"]}\tError message: {each["error_message"]}\t' \
                                  f'Request params: {each["request_params"]}\tHeaders: {each["request_headers"]}\t' \
+                                 f'Request body: {each["request_body"]}\t' \
                                  f'Response body: {each["response_body"]}\t\n'
-                with open(f"/tmp/{args['simulation']}.log", "a") as errors_file:
+                with open(f"/tmp/{self.args['simulation']}.log", "a") as errors_file:
                     errors_file.write(error_log_line)
 
 
