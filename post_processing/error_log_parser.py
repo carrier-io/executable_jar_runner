@@ -11,12 +11,15 @@ class ErrorLogHandler:
         self.last_position = 0  # Initial position in the file
 
     def check_new_records(self):
+        # Optimized pattern to capture everything between 'content=' and '======'
+        body_pattern = re.compile(r"content=(.*?)(?=\n=+)", re.DOTALL)
+        # Updated error pattern for response body (multi-line JSON after 'body:')
         error_pattern = re.compile(
             r"(?P<timestamp>\d{2}:\d{2}:\d{2}\.\d{3}) .*? Request '(?P<request_name>.*?)' failed for user .*?: (?P<error_message>.*?)\n"
             r".*?(?P<method>GET|POST|PUT|DELETE) (?P<url>https?://[^\s]+)\n"
             r"headers:\n(?P<request_headers>(?:\t.*?\n)*)"
             r".*?status:\n\t(?P<response_code>\d+).*?"
-            r"body:\n(?P<response_body>.*?)\n<<<<<<<<<<<<<<<<<<<<<<<<<",
+            r".*?body:\n(?P<response_body>.*?)<<<<<<<<<<<<<<<<<<<<<<<<<",
             re.DOTALL
         )
         # Read CSV file from the last known position
@@ -26,8 +29,6 @@ class ErrorLogHandler:
             self.last_position = file.tell()
             errors = []
             if new_data:
-                # New: Extract request body if present (include braces for JSON)
-                body_pattern = re.compile(r"body:StringChunksRequestBody\{charset=UTF-8, content=\{(.*?)\}\}", re.DOTALL)
                 # List of sensitive header names (lowercase)
                 sensitive_headers = [
                     'authorization', 'proxy-authorization', 'x-api-key', 'x-auth-token', 'x-access-token',
@@ -56,11 +57,19 @@ class ErrorLogHandler:
                             else:
                                 request_headers[k.strip()] = v.strip()
                     # Extract request body if present (include braces)
-                    request_body = None
+                    request_body = ""
                     body_match = body_pattern.search(new_data, match.start(), match.end())
-                    if body_match:
-                        request_body = body_match.group(1).strip()
                     error_key = f'{error_data["request_name"]}_{error_data["method"]}_{error_data["response_code"]}'
+                    if body_match:
+                        request_body = body_match.group(1).strip().replace("\t", " ").replace("\\t", " ").replace(
+                            "\n", " ").replace("\\n", " ")
+                    if len(request_body) > 5000:
+                        request_body = request_body[:5000] + '...truncated'
+                    response_body = error_data["response_body"].strip().replace("\t", " ").replace("\\t", " ").replace(
+                        "\n", " ").replace("\\n", " ") if error_data.get("response_body") else ""
+                    if len(response_body) > 5000:
+                        response_body = response_body[:5000] + '...truncated'
+
                     # Store formatted result
                     errors.append({
                         "error_key": error_key,
@@ -72,7 +81,7 @@ class ErrorLogHandler:
                         "request_params": request_params,
                         "request_headers": request_headers,
                         "request_body": request_body,  # New field
-                        "response_body": error_data["response_body"].strip().replace("\"", "").replace("'", "")
+                        "response_body":  response_body
                     })
             for each in errors:
                 error_log_line = f'Error key: {each["error_key"]}\tRequest name: {each["request_name"]}\t' \
@@ -81,6 +90,7 @@ class ErrorLogHandler:
                                  f'Request params: {each["request_params"]}\tHeaders: {each["request_headers"]}\t' \
                                  f'Request body: {each["request_body"]}\t' \
                                  f'Response body: {each["response_body"]}\t\n'
+
                 with open(f"/tmp/{self.args['simulation']}.log", "a") as errors_file:
                     errors_file.write(error_log_line)
 
