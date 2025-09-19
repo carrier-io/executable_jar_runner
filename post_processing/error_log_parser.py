@@ -22,67 +22,74 @@ class ErrorLogHandler:
             r".*?body:\n(?P<response_body>.*?)<<<<<<<<<<<<<<<<<<<<<<<<<",
             re.DOTALL
         )
+        sensitive_headers = [
+            'authorization', 'proxy-authorization', 'x-api-key', 'x-auth-token', 'x-access-token',
+            'set-cookie', 'cookie', 'password', 'x-password', 'x-session-token', 'x-csrf-token',
+            'x-xsrf-token', 'x-refresh-token', 'x-secret', 'x-client-secret', 'x-client-key',
+            'x-private-key', 'x-user-token', 'x-user-secret', 'x-otp', 'x-mfa', 'x-sso-token',
+            'x-id-token', 'x-refresh-token', 'x-jwt', 'jwt', 'bearer'
+        ]
         # Read CSV file from the last known position
         with open(self.error_log_file_path, 'r') as file:
             file.seek(self.last_position)
             new_data = file.read()
-            self.last_position = file.tell()
+            if not new_data:
+                return
+            # Split new_data into error blocks using the unique end marker
+            blocks = new_data.split('<<<<<<<<<<<<<<<<<<<<<<<<<')
+            processed_length = 0
             errors = []
-            if new_data:
-                # List of sensitive header names (lowercase)
-                sensitive_headers = [
-                    'authorization', 'proxy-authorization', 'x-api-key', 'x-auth-token', 'x-access-token',
-                    'set-cookie', 'cookie', 'password', 'x-password', 'x-session-token', 'x-csrf-token',
-                    'x-xsrf-token', 'x-refresh-token', 'x-secret', 'x-client-secret', 'x-client-key',
-                    'x-private-key', 'x-user-token', 'x-user-secret', 'x-otp', 'x-mfa', 'x-sso-token',
-                    'x-id-token', 'x-refresh-token', 'x-jwt', 'jwt', 'bearer'
-                ]
-                for match in error_pattern.finditer(new_data):
-                    error_data = match.groupdict()
-
-                    # Extract request parameters from URL (if any)
-                    url_parts = error_data["url"].split("?")
-                    request_params = url_parts[1] if len(url_parts) > 1 else None
-
-                    # Clean up headers and hide sensitive info
-                    request_headers = {}
-                    for line in error_data["request_headers"].strip().split("\n"):
-                        if ":" in line:
-                            k, v = line.split(":", 1)
-                            k_lower = k.strip().lower()
-                            v_lower = v.strip().lower()
-                            # Hide if header name is sensitive or value contains 'bearer' or 'password'
-                            if k_lower in sensitive_headers or any(s in v_lower for s in sensitive_headers):
-                                request_headers[k.strip()] = '***'
-                            else:
-                                request_headers[k.strip()] = v.strip()
-                    # Extract request body if present (include braces)
-                    request_body = ""
-                    body_match = body_pattern.search(new_data, match.start(), match.end())
-                    error_key = f'{error_data["request_name"]}_{error_data["method"]}_{error_data["response_code"]}'
-                    if body_match:
-                        request_body = body_match.group(1).strip().replace("\t", " ").replace("\\t", " ").replace(
-                            "\n", " ").replace("\\n", " ")
-                    if len(request_body) > 5000:
-                        request_body = request_body[:5000] + '...truncated'
-                    response_body = error_data["response_body"].strip().replace("\t", " ").replace("\\t", " ").replace(
-                        "\n", " ").replace("\\n", " ") if error_data.get("response_body") else ""
-                    if len(response_body) > 5000:
-                        response_body = response_body[:5000] + '...truncated'
-
-                    # Store formatted result
-                    errors.append({
-                        "error_key": error_key,
-                        "request_name": error_data["request_name"],
-                        "method": error_data["method"],
-                        "response_code": error_data["response_code"],
-                        "url": error_data["url"],
-                        "error_message": error_data["error_message"],
-                        "request_params": request_params,
-                        "request_headers": request_headers,
-                        "request_body": request_body,  # New field
-                        "response_body":  response_body
-                    })
+            for i, block in enumerate(blocks):
+                if not block.strip():
+                    processed_length += len(block) + len('<<<<<<<<<<<<<<<<<<<<<<<<<')
+                    continue
+                # Check if block is complete (ends with a newline, or next block exists)
+                if i < len(blocks) - 1 or new_data.endswith('<<<<<<<<<<<<<<<<<<<<<<<<<'):
+                    match = error_pattern.search(block + '<<<<<<<<<<<<<<<<<<<<<<<<<')
+                    if match:
+                        error_data = match.groupdict()
+                        url_parts = error_data["url"].split("?")
+                        request_params = url_parts[1] if len(url_parts) > 1 else None
+                        request_headers = {}
+                        for line in error_data["request_headers"].strip().split("\n"):
+                            if ":" in line:
+                                k, v = line.split(":", 1)
+                                k_lower = k.strip().lower()
+                                v_lower = v.strip().lower()
+                                if k_lower in sensitive_headers or any(s in v_lower for s in sensitive_headers):
+                                    request_headers[k.strip()] = '***'
+                                else:
+                                    request_headers[k.strip()] = v.strip()
+                        request_body = ""
+                        body_match = body_pattern.search(block)
+                        if body_match:
+                            request_body = body_match.group(1).strip().replace("\t", " ").replace("\\t", " ").replace("\n", " ").replace("\\n", " ")
+                        if len(request_body) > 5000:
+                            request_body = request_body[:5000] + '...truncated'
+                        response_body = error_data["response_body"].strip().replace("\t", " ").replace("\\t", " ").replace("\n", " ").replace("\\n", " ") if error_data.get("response_body") else ""
+                        if len(response_body) > 5000:
+                            response_body = response_body[:5000] + '...truncated'
+                        error_key = f'{error_data["request_name"]}_{error_data["method"]}_{error_data["response_code"]}'
+                        errors.append({
+                            "error_key": error_key,
+                            "request_name": error_data["request_name"],
+                            "method": error_data["method"],
+                            "response_code": error_data["response_code"],
+                            "url": error_data["url"],
+                            "error_message": error_data["error_message"],
+                            "request_params": request_params,
+                            "request_headers": request_headers,
+                            "request_body": request_body,
+                            "response_body": response_body
+                        })
+                        processed_length += len(block) + len('<<<<<<<<<<<<<<<<<<<<<<<<<')
+                    else:
+                        # If block does not match, treat as incomplete, break and do not advance last_position
+                        break
+                else:
+                    # Last block and not complete, break and do not advance last_position
+                    break
+            self.last_position += processed_length
             for each in errors:
                 error_log_line = f'Error key: {each["error_key"]}\tRequest name: {each["request_name"]}\t' \
                                  f'Method: {each["method"]}\tResponse code: {each["response_code"]}\t' \
@@ -90,7 +97,6 @@ class ErrorLogHandler:
                                  f'Request params: {each["request_params"]}\tHeaders: {each["request_headers"]}\t' \
                                  f'Request body: {each["request_body"]}\t' \
                                  f'Response body: {each["response_body"]}\t\n'
-
                 with open(f"/tmp/{self.args['simulation']}.log", "a") as errors_file:
                     errors_file.write(error_log_line)
 
