@@ -15,7 +15,7 @@ class ErrorLogHandler:
         body_pattern = re.compile(r"content=(.*?)(?=\n=+)", re.DOTALL)
         # Updated error pattern for response body (multi-line JSON after 'body:')
         error_pattern = re.compile(
-            r"(?P<timestamp>\d{2}:\d{2}:\d{2}\.\d{3}) .*? Request '(?P<request_name>.*?)' failed for user .*?: (?P<error_message>.*?)\n"
+            r".*?Request:\n(?P<request_name>.*?): KO (?P<error_message>.*?)\n"
             r".*?(?P<method>GET|POST|PUT|DELETE) (?P<url>https?://[^\s]+)\n"
             r"headers:\n(?P<request_headers>(?:\t.*?\n)*)"
             r".*?status:\n\t(?P<response_code>\d+).*?"
