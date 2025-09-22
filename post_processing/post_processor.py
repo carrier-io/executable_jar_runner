@@ -78,6 +78,3 @@ if __name__ == '__main__':
                       headers={**headers, 'Content-type': 'application/json'})
         files = {'file': open(path_to_reports + ".zip", 'rb')}
         requests.post(upload_url, params=s3_config, allow_redirects=True, files=files, headers=headers)
-        with open(f"/tmp/{args['simulation']}.log", "r") as errors_file:
-            print("errors count ***********************************")
-            print(len(errors_file.readlines()))
