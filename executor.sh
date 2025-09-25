@@ -3,6 +3,26 @@
 #RUN INFLUXDB
 bash /entrypoint.sh influxd &
 
+args=${GATLING_TEST_PARAMS}
+
+arr=(${args// / })
+
+if [[ ${args} == *"-Dtest_type="* ]]; then
+for i in "${arr[@]}"; do
+          if [[ $i =~ -Dtest_type=(.+) ]]; then
+            export test_type=${BASH_REMATCH[1]}
+          fi
+    done
+fi
+
+if [[ ${args} == *"-Denv_type="* ]]; then
+for i in "${arr[@]}"; do
+          if [[ $i =~ -Denv_type=(.+) ]]; then
+            export env=${BASH_REMATCH[1]}
+          fi
+    done
+fi
+
 export simulation_name=$test_name
 export influx_host="None"
 export influx_port=8086
