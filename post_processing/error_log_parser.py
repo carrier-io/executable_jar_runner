@@ -84,8 +84,9 @@ class ErrorLogHandler:
                         })
                         processed_length += len(block) + len('<<<<<<<<<<<<<<<<<<<<<<<<<')
                     else:
-                        # If block does not match, treat as incomplete, break and do not advance last_position
-                        break
+                        print("Skip an error as it don't match the pattern")
+                        processed_length += len(block) + len('<<<<<<<<<<<<<<<<<<<<<<<<<')
+                        continue
                 else:
                     # Last block and not complete, break and do not advance last_position
                     break
