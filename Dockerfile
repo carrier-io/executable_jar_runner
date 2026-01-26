@@ -32,7 +32,7 @@ RUN add-apt-repository ppa:deadsnakes/ppa && apt-get update && \
     rm -rf /tmp/*
 
 ENV rebuild 1
-RUN pip install git+https://github.com/carrier-io/perfreporter.git@updated_pandas
+RUN pip install git+https://github.com/carrier-io/perfreporter.git
 RUN pip install git+https://github.com/carrier-io/loki_logger.git
 
 # Creating carrier user and making him sudoer
