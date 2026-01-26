@@ -65,10 +65,10 @@ RUN apt-get update && \
   tzdata ca-certificates libsystemd-dev && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz
-RUN tar -xvf apache-maven-3.9.11-bin.tar.gz
-
-ENV M2_HOME='/opt/apache-maven-3.9.11'
+# Install Apache Maven 3.9.12
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.12/binaries/apache-maven-3.9.12-bin.tar.gz
+RUN tar -xvf apache-maven-3.9.12-bin.tar.gz
+ENV M2_HOME='/opt/apache-maven-3.9.12'
 ENV PATH="$M2_HOME/bin:$PATH"
 
 RUN mvn -version
